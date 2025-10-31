@@ -1,80 +1,131 @@
+# 🏦 KipuBankV2 - Contrato Bancario Multi-Token
 
-# KipuBankV2
+Contrato bancario descentralizado que extiende **KipuBank** original con soporte multi-token, oráculos **Chainlink** y control de acceso avanzado.
 
-## Mejoras Implementadas
+---
 
-### Control de Acceso con Roles
-Sistema de roles con OpenZeppelin AccessControl que restringe funciones administrativas como registro de tokens y actualización de oráculos.
+## 🚀 Despliegue Rápido en Sepolia
 
-### Soporte Multi-Token con Mappings Anidados
-Mappings anidados (`mapping(address => mapping(address => uint256))`) para gestionar balances separados de múltiples tokens ERC20 por usuario.
+### 🧩 Prerrequisitos
+- MetaMask configurado con la red **Sepolia**
+- ETH de prueba desde un [Sepolia Faucet](https://sepoliafaucet.com)
 
-### Integración con Oráculos Chainlink
-Conexión con Chainlink Price Feeds para conversiones en tiempo real de ETH y tokens a USD, permitiendo contabilidad estandarizada.
+### ⚙️ Pasos para Despliegue
+1. Conectar **Remix** a **MetaMask**
+2. Seleccionar **Environment:** `Injected Provider - MetaMask`
+3. Asegurarse de que **MetaMask** esté en la red **Sepolia**
 
-### Sistema de Conversión de Decimales
-Normalización de valores a 6 decimales (estándar USDC) con manejo automático de tokens con diferentes decimales.
+### 🧱 Parámetros del Constructor
+Completar los campos con los siguientes valores:
 
-## Instrucciones de Despliegue (desde Remix)
-
-### 1. Configuración Inicial
-- Acceder a [https://remix.ethereum.org](https://remix.ethereum.org)
-- Crear carpeta `/src` y subir archivo **KipuBankV2.sol**
-
-### 2. Compilación
-- Seleccionar compilador Solidity (versión `0.8.26`)
-- Compilar **KipuBankV2.sol** sin errores
-
-### 3. Despliegue en Sepolia
-- **Environment:** "Injected Provider - MetaMask"
-- **Network:** Sepolia Testnet
-- **Parámetros del constructor:**
-  - `_limitePorTx`: 1000000000000000000 (1 ETH)
-  - `_bankCap`: 5000000000000000000 (5 ETH)
-  - `_ethUsdFeed`: 0x694AA1769357215DE4FAC081bf1f309aDC325306
-  - `_admin`: Tu dirección de MetaMask
-
-### 4. Verificación en Block Explorer
-- Copiar dirección del contrato desplegado
-- Verificar en [Sepolia Etherscan](https://sepolia.etherscan.io)
-- Publicar código fuente completo
-
-## Interacción con el Contrato
-
-### Operaciones para Usuarios
 ```solidity
+_limiteGlobalUSD = 1000000000        // 1000 USD (6 decimales)
+_limiteETH       = 100000000000000000  // 0.1 ETH (en wei)
+_ethUsdFeed      = 0x694AA1769357215DE4FAC081bf1f309aDC325306  // Feed ETH/USD (Sepolia)
+_admin           = [TU_DIRECCION_METAMASK]  // Dirección del administrador
+
+✅ Desplegar y Verificar
+
+Confirmar la transacción en MetaMask
+
+Verificar el contrato en Etherscan Sepolia (pestaña “Verify & Publish” en https://sepolia.etherscan.io
+)
+
+🏗️ Arquitectura y Mejoras
+🔹 Características Principales
+
+✅ Soporte Multi-Token: ETH + ERC20 con balances separados
+✅ Límites en USD: Control de capacidad global en dólares
+✅ Oráculos Chainlink: Precios en tiempo real para conversiones
+✅ Control de Acceso: Roles administrativos con OpenZeppelin
+✅ Seguridad: ReentrancyGuard y SafeERC20
+
+🔗 Direcciones en Sepolia Testnet
+📊 Tokens ERC20 Disponibles
+
+(Contratos de tokens reales en Sepolia que los usuarios pueden depositar)
+
+Token	Dirección	Descripción
+ETH	0x0000000000000000000000000000000000000000	ETH nativo (no ERC20)
+USDC	0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238	Contrato token USDC
+LINK	0x779877A7B0D9E8603169DdbD7836e478b4624789	Contrato token LINK
+
+🔄 Feeds Chainlink de Precios
+
+(Oráculos que proveen datos de precios en tiempo real)
+
+Feed	Dirección	Par
+ETH/USD	0x694AA1769357215DE4FAC081bf1f309aDC325306	ETH/USD
+USDC/USD	0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E	USDC/USD
+LINK/USD	0xc59E3633BAAC79493d908e63626716e204A45EdF	LINK/USD
+
+🧠 Diferencia clave:
+Los tokens son activos que los usuarios depositan; los feeds son oráculos que proveen precios para las conversiones.
+
+💻 Interacción con el Contrato
+👤 Para Usuarios
 // Depositar ETH
-depositar({ value: 100000000000000000 }) // 0.1 ETH
+depositarETH({ value: 10000000000000000 }) // 0.01 ETH
 
-// Depositar tokens ERC20
-depositERC20(tokenAddress, 1000000)
+// Depositar ERC20
+depositarERC20(usdcAddress, 1000000) // 1 USDC
 
-// Retirar tokens
-withdrawERC20(tokenAddress, 500000)
+// Consultar saldos
+saldoDe(ethAddress, userAddress)       // ETH (usar address(0))
+saldoDe(usdcAddress, userAddress)      // USDC
+saldoDeUSD(tokenAddress, userAddress)  // En USD
 
-// Consultar balances
-balanceOfToken(tokenAddress, userAddress)
+🛠️ Para Administradores
+// Registrar nuevo token (requiere token + feed)
+registrarToken(tokenAddress, feedAddress, decimals, limite)
 
-// Conversiones a USD
-convertEthToUSD(1000000000000000000) // 1 ETH
-convertTokenToUSD(tokenAddress, 1000000)
+// Gestionar límites
+actualizarLimiteToken(tokenAddress, nuevoLimite)
 
-### Operaciones para Administradores
-// Registrar token ERC20
-registerToken(tokenAddress, feedAddress, 18)
+// Configurar feeds
+actualizarFeedToken(tokenAddress, nuevoFeed)
 
-// Actualizar feed ETH/USD
-setEthFeed(feedAddress)
+🛡️ Características de Seguridad
 
-// Retiro de emergencia
-emergencyWithdrawToken(tokenAddress, destination)
+ReentrancyGuard: Protección contra ataques de reentrada
 
-### Decisiones de Diseño y Trade-offs
+SafeERC20: Transferencias seguras de tokens
 
-| Decisión                                             | Motivo                                                      | Trade-off                                                            |
-| ---------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------- |
-| Uso de `AccessControl` de OpenZeppelin               | Permite múltiples roles y mayor flexibilidad que `Ownable`. | Aumenta el consumo de gas en ciertas operaciones.                    |
-| Implementación de oráculos de Chainlink              | Aporta datos de precios confiables.                         | Depende de la disponibilidad de los feeds y aumenta el costo de gas. |
-| Estandarización de decimales (6 decimales tipo USDC) | Facilita comparaciones entre activos.                       | Requiere adaptar tokens con distintos decimales.                     |
-| Herencia del contrato original                       | Reutiliza lógica probada del KipuBank anterior.             | Aumenta la complejidad del código.                                   |
-| Uso de `SafeERC20`                                   | Evita errores comunes en transferencias ERC20.              | Leve sobrecarga de gas.                                              |
+Validaciones: Límites por transacción y globales
+
+AccessControl: Funciones administrativas restringidas
+
+📊 Funciones de Consulta
+// Balances y conversiones
+calcularTotalBalanceUSD()    // Total del banco en USD
+capacidadDisponibleUSD()     // Capacidad restante
+convertirAUSD(token, monto)  // Conversión a USD
+
+// Información del sistema
+obtenerTokensRegistrados()   // Lista de tokens
+obtenerLimiteToken(token)    // Límite por token
+
+🔧 Configuración Post-Despliegue
+Registrar Tokens ERC20
+
+Ejemplo: Registrar USDC con su feed correspondiente:
+
+registrarToken(
+  0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238, // Token USDC
+  0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E,  // Feed USDC/USD
+  6,                                            // Decimales del token
+  500000000                                     // Límite: 500 USDC
+)
+
+Probar Funcionalidades
+
+✅ Depósitos y retiros de ETH y ERC20
+✅ Verificación de límites por token
+✅ Conversión a USD en tiempo real
+✅ Validación de eventos emitidos
+
+📄 Licencia: MIT
+🔗 Red: Sepolia Testnet
+🧱 Repositorio: KipuBankV2 en GitHub
+
+✉️ Autor: Horacio Barrabasqui
